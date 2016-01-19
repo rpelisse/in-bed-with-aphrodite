@@ -9,12 +9,12 @@ readonly APHRODITE=${APHRODITE:-"${HOME}/.m2/repository/org/jboss/set/aphrodite/
 
 readonly INTERACTIVE=${INTERACTIVE:-''}
 
-if [ -z "${BZ_USERNAME}" ]; then
+if [ -z "${TRACKER_USERNAME}" ]; then
   echo "No 'username' for Bugzilla provided."
   exit 1
 fi
 
-if [ -z "${BZ_PASSWORD}" ]; then
+if [ -z "${TRACKER_PASSWORD}" ]; then
   echo "No 'password' for Bugzilla provided."
   exit 2
 fi
@@ -23,4 +23,4 @@ readonly SCRIPT=${1}
 
 shift
 
-scala -classpath "${APHRODITE}:${JCOMMANDER}" "${SCRIPT}" -u "${BZ_USERNAME}" -p "${BZ_PASSWORD}" ${@}
+scala -classpath "${APHRODITE}:${JCOMMANDER}" "${SCRIPT}" -u "${TRACKER_USERNAME}" -p "${TRACKER_PASSWORD}" ${@}
