@@ -58,13 +58,21 @@ for (  arg <- args ) {
 // OK, complete horror stop here...
 new JCommander(Args, newArgs.toArray: _*)
 
-def getServerUrl(s: String) = {
-  s.substring(0,s.indexOf('/', "https://".length) + 1)
+def getServerUrl(s: String) = s.substring(0,s.indexOf('/', "https://".length) + 1)
+
+def defineTrackerType(trackerUrl: String) = if ( tracker.contains("bugzilla") ) TrackerType.BUGZILLA else TrackerType.JIRA
+
+def allStageToSet() = {
+  val stage = new Stage()
+  stage.getStateMap().put(Flag.DEV,FlagStatus.SET)
+  stage.getStateMap().put(Flag.PM,FlagStatus.SET)
+  stage.getStateMap().put(Flag.QE,FlagStatus.SET)
+  stage
 }
 
 val tracker = getServerUrl(Args.bugId)
 val issueTrackerConfigs: List[IssueTrackerConfig] = new ArrayList[IssueTrackerConfig];
-issueTrackerConfigs.add(new IssueTrackerConfig(tracker, Args.username, Args.password, TrackerType.BUGZILLA, 1))
+issueTrackerConfigs.add(new IssueTrackerConfig(tracker, Args.username, Args.password, defineTrackerType(tracker), 1))
 val aphrodite = Aphrodite.instance(AphroditeConfig.issueTrackersOnly(issueTrackerConfigs))
 println("Aphrodite configured - retrieving data from server:" + tracker)
 
@@ -73,12 +81,7 @@ println("Retrieved Issue:" + issue.getSummary.get())
 issue.setAssignee(Args.assignedTo)
 issue.setStatus(IssueStatus.ASSIGNED)
 issue.setEstimation(new IssueEstimation(Args.estimate))
-val stage = new Stage()
-stage.getStateMap().put(Flag.DEV,FlagStatus.SET)
-stage.getStateMap().put(Flag.PM,FlagStatus.SET)
-stage.getStateMap().put(Flag.QE,FlagStatus.SET)
-issue.setStage(stage)
+issue.setStage(allStageToSet)
 aphrodite.updateIssue(issue)
-val comment = new Comment(Args.comment, false)
-aphrodite.addCommentToIssue(issue, comment)
+aphrodite.addCommentToIssue(issue, new Comment(Args.comment, false))
 println("Task " + issue.getTrackerId.get + " has been assigned to " + issue.getAssignee.get)
