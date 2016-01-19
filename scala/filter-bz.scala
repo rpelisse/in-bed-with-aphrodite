@@ -19,7 +19,8 @@ import scala.collection.JavaConversions._
 val filters = scala.collection.immutable.Map(
   ("SET",     "https://bugzilla.redhat.com/buglist.cgi?cmdtype=dorem&remaction=run&sharer_id=374917&namedcmd=rpelisse-jboss-eap-6.4.z-superset-only-new"),
   ("BACKLOG", "https://bugzilla.redhat.com/buglist.cgi?cmdtype=dorem&remaction=run&sharer_id=213224&namedcmd=Potential%20JBoss%20SET%20EAP%206%20issues"),
-  ("MINE",    "https://bugzilla.redhat.com/buglist.cgi?cmdtype=dorem&remaction=run&sharer_id=374917&namedcmd=mine")
+  ("MINE",    "https://bugzilla.redhat.com/buglist.cgi?cmdtype=dorem&remaction=run&sharer_id=374917&namedcmd=mine"),
+  ("EAP7",    "https://issues.jboss.org/issues/?filter=12324632")
 )
 
 // change if you will
@@ -143,8 +144,10 @@ def buildAphrodite() = {
 
   val filterUrl = loadFilterURl(Args.filterName)
   val tracker = getServerUrl(filterUrl)
+  val trackerType = if ( tracker.contains("bugzilla") ) TrackerType.BUGZILLA else TrackerType.JIRA
+
   val issueTrackerConfigs: List[IssueTrackerConfig] = new ArrayList[IssueTrackerConfig];
-  issueTrackerConfigs.add(new IssueTrackerConfig(tracker, Args.username, Args.password, TrackerType.BUGZILLA, 1))
+  issueTrackerConfigs.add(new IssueTrackerConfig(tracker, Args.username, Args.password, trackerType, 1))
   Aphrodite.instance(AphroditeConfig.issueTrackersOnly(issueTrackerConfigs))
 }
 

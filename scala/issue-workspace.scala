@@ -57,12 +57,10 @@ new JCommander(Args, args.toArray: _*)
 def getServerUrl(s: String) =  s.substring(0,s.indexOf('/', "https://".length) + 1)
 
 val tracker = getServerUrl(Args.bugId)
-
 val trackerType = if ( tracker.contains("bugzilla") ) TrackerType.BUGZILLA else TrackerType.JIRA
 val issuePrefix = if ( trackerType.equals(TrackerType.BUGZILLA ) ) "BZ" else ""
 
 val issueTrackerConfigs: List[IssueTrackerConfig] = new ArrayList[IssueTrackerConfig];
-println("Tracker Config:" + Args.username + "," + Args.password + "," +  trackerType )
 issueTrackerConfigs.add(new IssueTrackerConfig(tracker, Args.username, Args.password, trackerType , 1))
 
 val aphrodite = Aphrodite.instance(AphroditeConfig.issueTrackersOnly(issueTrackerConfigs))

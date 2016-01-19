@@ -60,7 +60,8 @@ new JCommander(Args, newArgs.toArray: _*)
 
 def getServerUrl(s: String) = s.substring(0,s.indexOf('/', "https://".length) + 1)
 
-def defineTrackerType(trackerUrl: String) = if ( tracker.contains("bugzilla") ) TrackerType.BUGZILLA else TrackerType.JIRA
+val tracker = getServerUrl(Args.bugId)
+val trackerType = if ( tracker.contains("bugzilla") ) TrackerType.BUGZILLA else TrackerType.JIRA
 
 def allStageToSet() = {
   val stage = new Stage()
@@ -70,9 +71,8 @@ def allStageToSet() = {
   stage
 }
 
-val tracker = getServerUrl(Args.bugId)
 val issueTrackerConfigs: List[IssueTrackerConfig] = new ArrayList[IssueTrackerConfig];
-issueTrackerConfigs.add(new IssueTrackerConfig(tracker, Args.username, Args.password, defineTrackerType(tracker), 1))
+issueTrackerConfigs.add(new IssueTrackerConfig(tracker, Args.username, Args.password, trackerType, 1))
 val aphrodite = Aphrodite.instance(AphroditeConfig.issueTrackersOnly(issueTrackerConfigs))
 println("Aphrodite configured - retrieving data from server:" + tracker)
 

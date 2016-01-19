@@ -27,6 +27,8 @@ object Args {
 new JCommander(Args, args.toArray: _*)
 
 def getServerUrl(s: String) = s.substring(0,s.indexOf('/', "https://".length) + 1)
+val tracker = getServerUrl(Args.bugId)
+val trackerType = if ( tracker.contains("bugzilla") ) TrackerType.BUGZILLA else TrackerType.JIRA
 
 def printIssueIfDevAckMissing(issue: Issue) = println(formatIssue(issue))
 
@@ -34,9 +36,8 @@ def formatIssue(issue: Issue) = issue.getTrackerId.get + " (" + aggregateAllThre
 
 def aggregateAllThreeFlags(stage: Stage):String = (for ( f <- stage.getStateMap.keySet() ) yield(f.toString + stage.getStatus(f).getSymbol + ",")).mkString.dropRight(1)
 
-val tracker = getServerUrl(Args.bugId)
 val issueTrackerConfigs: List[IssueTrackerConfig] = new ArrayList[IssueTrackerConfig];
-issueTrackerConfigs.add(new IssueTrackerConfig(tracker, Args.username, Args.password, TrackerType.BUGZILLA, 1))
+issueTrackerConfigs.add(new IssueTrackerConfig(tracker, Args.username, Args.password, trackerType, 1))
 val aphrodite = Aphrodite.instance(AphroditeConfig.issueTrackersOnly(issueTrackerConfigs))
 println("Aphrodite configured - retrieving data from server:" + tracker)
 
