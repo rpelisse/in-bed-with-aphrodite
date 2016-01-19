@@ -10,12 +10,12 @@ readonly APHRODITE=${APHRODITE:-"${HOME}/.m2/repository/org/jboss/set/aphrodite/
 readonly INTERACTIVE=${INTERACTIVE:-''}
 
 if [ -z "${TRACKER_USERNAME}" ]; then
-  echo "No 'username' for Bugzilla provided."
+  echo "No 'username' for the tracker provided."
   exit 1
 fi
 
 if [ -z "${TRACKER_PASSWORD}" ]; then
-  echo "No 'password' for Bugzilla provided."
+  echo "No 'password' for the tracker provided."
   exit 2
 fi
 
