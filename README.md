@@ -11,7 +11,7 @@ The only reason I've develop those scripts in Scala, it's because it allowed me 
 How to use the script ?
 ----
 
-~Important note: all the scripts expect the env variable BZ_USERNAME and BZ_PASSWORD to defined.~
+~Important note: all the scripts expect the env variable TRACKER_USERNAME and TRACKER_PASSWORD to defined accordingly to the tracker (Bugzilla or JIRA) used.~
 
 * assign-issue:
     Assign issue to somebody (change status to ASSIGNED), along with adding the required flags (dev?,pm?,qa?)
@@ -28,6 +28,23 @@ How to use the script ?
     ```
 
     ~Note: be carefull with the comment arg, it easily breaks !~
+
+    ~Note: those not work with JIRA for now, due to an issue with Aphrodite
+    ~
+* issue-workspace:
+    An script quite specific to my way of work - it set up a local folder for an issue, and download
+    all the infos on it into a local file. Help work offline. Also, it creates .workspace folder to
+    use with Eclipse. This is a start, it might get enhance down the road, to do more.
+
+    Syntax:
+    ```
+    $ ./issue-workspace <bug-url>
+    ```
+
+    Example:
+    ```
+    $ ./issue-workspace https://bugzilla.redhat.com/show_bug.cgi?id=1235744
+    ```
 
 * list-stage-deps.sh:
     List of the dependencies of one issue, along with the status of each flag (dev,pm, qe). Come in
