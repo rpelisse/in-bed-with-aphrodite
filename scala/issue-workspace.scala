@@ -58,10 +58,12 @@ def getServerUrl(s: String) =  s.substring(0,s.indexOf('/', "https://".length) +
 
 val tracker = getServerUrl(Args.bugId)
 
-val issuePrefix = if ( tracker.contains("bugzilla") ) "BZ" else ""
+val trackerType = if ( tracker.contains("bugzilla") ) TrackerType.BUGZILLA else TrackerType.JIRA
+val issuePrefix = if ( trackerType.equals(TrackerType.BUGZILLA ) ) "BZ" else ""
 
 val issueTrackerConfigs: List[IssueTrackerConfig] = new ArrayList[IssueTrackerConfig];
-issueTrackerConfigs.add(new IssueTrackerConfig(tracker, Args.username, Args.password, TrackerType.BUGZILLA, 1))
+println("Tracker Config:" + Args.username + "," + Args.password + "," +  trackerType )
+issueTrackerConfigs.add(new IssueTrackerConfig(tracker, Args.username, Args.password, trackerType , 1))
 
 val aphrodite = Aphrodite.instance(AphroditeConfig.issueTrackersOnly(issueTrackerConfigs))
 println("Aphrodite configured - retrieving data from server:" + tracker)
