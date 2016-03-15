@@ -24,9 +24,3 @@ if [ ! -d "${WORKSPACES_ROOT}" ]; then
 fi
 
 ${SCRIPT_HOME}/run-scala.sh ${SCRIPT_HOME}/scala/${SCRIPT_NAME} -i "${BUG_ID}" -d "${WORKSPACES_ROOT}"
-
-
-if [ -z "${STY}" ]; then
-  cd "${BZW}"
-  screen -S "BZ${BZ}"
-fi
