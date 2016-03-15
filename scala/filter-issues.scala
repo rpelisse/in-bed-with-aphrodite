@@ -26,6 +26,8 @@ val filters = scala.collection.immutable.Map(
 // change if you will
 val EXCLUDE_FILE = System.getProperty("user.home") + File.separator + ".exclude-list.csv"
 
+val EXCLUDE_COMPONENTS = scala.collection.immutable.List( "RPMs", "Documentation - Translation", "Maven Repository", "distribution", "mod_cluster", "Apache Server (httpd) and Connectors")
+
 object Args {
 
   @Parameter(names = Array("-f", "--bz-filter-name"), description = "Filter name", required = false)
@@ -64,21 +66,19 @@ def typeFilter(issue: Issue): Option[Issue] = issue.getType() match {
 
 def componentFilter(issueOrNot: Option[Issue]): Option[Issue] = {
   issueOrNot match {
-    case Some(issue) => issue.getComponent.get match {
-      case "RPMs" => None
-      case "Documentation - Translation" => None
-      case "Maven Repository" => None
-      case "distribution" => None
-      case "mod_cluster" => None
-      case "Apache Server (httpd) and Connectors" => None
-      case _ => Some(issue)
+    case Some(issue) => {
+      import scala.collection.JavaConverters._
+      if ( EXCLUDE_COMPONENTS.diff(issue.getComponents().asScala).size.>(0) )
+         Some(issue)
+      else
+         None
     }
     case None => None
   }
 }
 
 def formatEntry(bug: Issue): String= {
-  bug.getURL + "\t[" + bug.getComponent.get + " - " + bug.getType.toString +  "] : \t'" + bug.getSummary().get + "'"
+  bug.getURL + "\t[" + bug.getComponents + " - " + bug.getType.toString +  "] : \t'" + bug.getSummary().get + "'"
 }
 
 def mv(oldName: String, newName: String) =  Try(new File(oldName).renameTo(new File(newName))).getOrElse(false)

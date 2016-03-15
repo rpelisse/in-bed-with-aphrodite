@@ -4,7 +4,7 @@
 readonly JCOMMANDER_VERSION='1.48'
 readonly JCOMMANDER=${JCOMMANDER:-"${HOME}/.m2/repository/com/beust/jcommander/${JCOMMANDER_VERSION}/jcommander-${JCOMMANDER_VERSION}.jar"}
 
-readonly APHRODITE_VERSION='0.2.2'
+readonly APHRODITE_VERSION=${APHRODITE_VERSION:-'0.3.0'}
 readonly APHRODITE=${APHRODITE:-"${HOME}/.m2/repository/org/jboss/set/aphrodite/${APHRODITE_VERSION}/aphrodite-${APHRODITE_VERSION}.jar"}
 
 readonly INTERACTIVE=${INTERACTIVE:-''}
