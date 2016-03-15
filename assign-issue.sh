@@ -11,7 +11,7 @@ readonly ASSIGNED_TO=${3:-'rpelisse@redhat.com'}
 readonly COMMENT=${4:-'I will take a look at this as soon as possible'}
 
 usage() {
-  echo "$(basename ${0}) <bug-id> [assigned_to] [estimate]"
+  echo "$(basename ${0}) <bug-id> [estimate] [assigned_to]"
   echo ''
   exit
 }
