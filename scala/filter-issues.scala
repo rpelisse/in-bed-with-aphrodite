@@ -258,7 +258,8 @@ val fw = loadAndPrintCacheFileIfExistsAndQuitOrCreateIt(Args.filterName, Args.de
 // FIXME: incrementing counter ? So un-scala-ee...
 var nbIssuesIgnored = 0
 var nbIssuesRetrieved = 0
-buildAphrodite().searchIssuesByFilter(new java.net.URL(loadFilterURl(Args.filterName))).foreach(bug => {
+val aphrodite = buildAphrodite()
+aphrodite.searchIssuesByFilter(new java.net.URL(loadFilterURl(Args.filterName))).foreach(bug => {
     nbIssuesRetrieved = nbIssuesRetrieved + 1
     if ( ! excludedIds.contains(bug.getURL.toString())) {
       componentFilter(typeFilter(bug)) match {
@@ -274,5 +275,6 @@ buildAphrodite().searchIssuesByFilter(new java.net.URL(loadFilterURl(Args.filter
   }
 )
 fw.close()
+aphrodite.close()
 Console.err.println("Nb issues retrieved:" + nbIssuesRetrieved)
 Console.err.println("Nb issues ignored:" + nbIssuesIgnored)
