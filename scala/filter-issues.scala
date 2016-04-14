@@ -25,6 +25,8 @@ val filters = scala.collection.immutable.Map(
   ("EAP7_UNRESOLVED", "https://issues.jboss.org/rest/api/latest/filter/12326686")
 )
 
+val MAX_ISSUES_FETCHED = 1000
+
 // change if you will
 val EXCLUDE_FILE = System.getProperty("user.home") + File.separator + ".exclude-list.csv"
 
@@ -149,7 +151,7 @@ def buildAphrodite() = {
   val trackerType = if ( tracker.contains("bugzilla") ) TrackerType.BUGZILLA else TrackerType.JIRA
 
   val issueTrackerConfigs: List[IssueTrackerConfig] = new ArrayList[IssueTrackerConfig];
-  issueTrackerConfigs.add(new IssueTrackerConfig(tracker, Args.username, Args.password, trackerType, 1))
+  issueTrackerConfigs.add(new IssueTrackerConfig(tracker, Args.username, Args.password, trackerType, MAX_ISSUES_FETCHED))
   Aphrodite.instance(AphroditeConfig.issueTrackersOnly(issueTrackerConfigs))
 }
 
