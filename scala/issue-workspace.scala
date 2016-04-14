@@ -22,7 +22,7 @@ val EOL = "\n"
 def formatIssue(issue: Issue) = {
   issue.getTrackerId.get + EOL +
   issue.getSummary.get + " (" + aggregateAllThreeFlags(issue.getStage()) + ")" + EOL
-  issue.getRelease.toString + EOL
+  issue.getReleases().toString + EOL
   issue.getDescription.get + EOL + aggregateComments(issue)
 }
 
@@ -69,7 +69,9 @@ println("Aphrodite configured - retrieving data from server:" + tracker)
 val issue = aphrodite.getIssue(new java.net.URL(Args.bugId))
 println("Retrieved Issue:" + issue.getSummary.get())
 
-val issueDir = Args.rootDir + File.separator + issuePrefix + issue.getTrackerId().get().toLowerCase()
+aphrodite.close()
+
+val issueDir = Args.rootDir + File.separator + issuePrefix + issue.getTrackerId().get().toUpperCase()
 println("Creating workdir: " + issueDir)
 new java.io.File(issueDir + File.separator + ".workspace").mkdirs
 
