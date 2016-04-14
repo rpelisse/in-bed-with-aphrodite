@@ -52,6 +52,8 @@ object Args {
   @Parameter(names = Array("-i", "--add-issues-to-ignore-list") , variableArity = true, required = false)
   var ignoreIds: java.util.List[String] = new java.util.ArrayList[String]()
 
+  @Parameter(names = Array("-r", "--reason-to-ignore"), description = "Use with -i and gives extra information on why the issue has been added to the ignore list", required = false)
+  var reason: String = ""
 }
 
 def collectionToSet(ids: Collection[String]): Set[String] = {
@@ -217,15 +219,13 @@ def turnIntoURLsCollection(urls: Seq[java.net.URL]) = {
   coll
 }
 
-def ignoreIssues(issues: List[String]) = {
+def ignoreIssues(issues: List[String], reason: String = "No reason provided") = {
   val coll = turnIntoURLsCollection(buildURLListFrom(issues))
   val ignoredIssues = buildAphrodite().getIssues(coll)
-  ignoredIssues.foreach { addBugToExcludeList }
+  for ( issue <- ignoredIssues) yield(addBugToExcludeList(issue, reason))
 }
 
-def addBugToExcludeList(bug: Issue) =
-  scala.tools.nsc.io.File(EXCLUDE_FILE).appendAll(formatEntry(bug)  + ", status " +
-    bug.getStatus.toString + ", insert reason or reminder for ignore here\n")
+def addBugToExcludeList(bug: Issue, reason: String) = scala.tools.nsc.io.File(EXCLUDE_FILE).appendAll(formatEntry(bug)  + ", status " + bug.getStatus.toString + reason + "\n")
 
 new JCommander(Args, args.toArray: _*)
 
@@ -241,7 +241,10 @@ if ( Args.purgeIgnoreList ) {
 
 if ( ! Args.ignoreIds.isEmpty ) {
   Console.err.println("Adding " + Args.ignoreIds.size + " issues (if no duplicate entries) to the ignore list:")
-  ignoreIssues(Args.ignoreIds)
+  if ( ! "".equals(Args.reason) )
+    ignoreIssues(Args.ignoreIds, Args.reason)
+  else
+    ignoreIssues(Args.ignoreIds)
   System.exit(0)
 }
 
