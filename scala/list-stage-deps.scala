@@ -32,7 +32,7 @@ val trackerType = if ( tracker.contains("bugzilla") ) TrackerType.BUGZILLA else 
 
 def printIssueIfDevAckMissing(issue: Issue) = println(formatIssue(issue))
 
-def formatIssue(issue: Issue) = issue.getTrackerId.get + " (" + aggregateAllThreeFlags(issue.getStage()) + "): " + issue.getSummary.get
+def formatIssue(issue: Issue) = issue.getTrackerId.get + " (" + aggregateAllThreeFlags(issue.getStage()) + "): " + issue.getSummary.get + "[" + issue.getType() + "]"
 
 def aggregateAllThreeFlags(stage: Stage):String = (for ( f <- stage.getStateMap.keySet() ) yield(f.toString + stage.getStatus(f).getSymbol + ",")).mkString.dropRight(1)
 
