@@ -32,6 +32,9 @@ val EXCLUDE_FILE = System.getProperty("user.home") + File.separator + ".exclude-
 
 val EXCLUDE_COMPONENTS = scala.collection.immutable.List( "RPMs", "Documentation - Translation", "Maven Repository", "distribution", "mod_cluster", "Apache Server (httpd) and Connectors")
 
+val SET_USERNAME_LIST =
+  scala.collection.immutable.List("soul2zimate","istudens","rpelisse","baranowb", "iweiss","thofman", "spyrkob", "dpospisil", "elguardian", "ron_sigal", "pgier" /* not SET, but PROD*/)
+
 object Args {
 
   @Parameter(names = Array("-f", "--bz-filter-name"), description = "Filter name", required = false)
@@ -54,6 +57,9 @@ object Args {
 
   @Parameter(names = Array("-r", "--reason-to-ignore"), description = "Use with -i and gives extra information on why the issue has been added to the ignore list", required = false)
   var reason: String = ""
+
+  @Parameter(names = Array("-s", "--sort-by"), description = "indicate which field should be ", required = false)
+  var sortedBy : String = "c"
 }
 
 def collectionToSet(ids: Collection[String]): Set[String] = {
@@ -70,6 +76,21 @@ def typeFilter(issue: Issue): Option[Issue] = issue.getType() match {
   case _ => Some(issue)
 }
 
+def assigneeFilter(issueOrNot: Option[Issue]): Option[Issue] = {
+  issueOrNot match {
+    case Some(issue) => {
+      if ( issue.getAssignee.isPresent) {
+        if ( SET_USERNAME_LIST.contains( issue.getAssignee.get().getName().get() ) ) {
+          None
+        } else
+          Some(issue)
+      } else
+        Some(issue)
+    }
+    case None => None
+  }
+}
+
 def componentFilter(issueOrNot: Option[Issue]): Option[Issue] = {
   issueOrNot match {
     case Some(issue) => {
@@ -83,9 +104,9 @@ def componentFilter(issueOrNot: Option[Issue]): Option[Issue] = {
   }
 }
 
-def formatEntry(bug: Issue): String= {
-  bug.getURL + "\t[" + bug.getComponents + " - " + bug.getType.toString +  "] : \t'" + bug.getSummary().get + "'"
-}
+def formatAssigne(bug: Issue) =  "@" + (if ( bug.getAssignee.isPresent ) bug.getAssignee.get().getName().get() else "")
+
+def formatEntry(bug: Issue): String= bug.getURL + "\t" + bug.getComponents + " - " + bug.getType.toString +  "\t" + formatAssigne(bug) + "\t\t'" + bug.getSummary().get + "'"
 
 def mv(oldName: String, newName: String) =  Try(new File(oldName).renameTo(new File(newName))).getOrElse(false)
 
@@ -137,7 +158,7 @@ def excludeList(filename: String): List[String] = {
 }
 
 def loadAndPrintCacheFileIfExistsAndQuitOrCreateIt(filterName: String, deleteCacheFile: Boolean) = {
-  val cacheFile = new File( "/tmp/" + filterName  + ".csv")
+  val cacheFile = new File(getCacheFilePath(filterName))
   if ( cacheFile.exists() && ! deleteCacheFile ) {
     loadAndPrintCacheFileThenExit(cacheFile)
   }
@@ -225,7 +246,17 @@ def ignoreIssues(issues: List[String], reason: String = "No reason provided") = 
   for ( issue <- ignoredIssues) yield(addBugToExcludeList(issue, reason))
 }
 
-def addBugToExcludeList(bug: Issue, reason: String) = scala.tools.nsc.io.File(EXCLUDE_FILE).appendAll(formatEntry(bug)  + ", status " + bug.getStatus.toString + reason + "\n")
+def addBugToExcludeList(bug: Issue, reason: String) = scala.tools.nsc.io.File(EXCLUDE_FILE).appendAll(formatEntry(bug)  + ", state: " + bug.getStatus.toString + ", " + reason + "\n")
+
+def getCacheFilePath(filterName:String) = "/tmp/" + filterName  + ".csv";
+
+def sortByField(issue: Issue, option: String) = {
+  option match {
+    case "t" => issue.getType().toString()
+    case "a" => if ( issue.getAssignee().isPresent() ) issue.getAssignee().get().getName().toString() else ""
+    case "c" => issue.getComponents().toString
+  }
+}
 
 new JCommander(Args, args.toArray: _*)
 
@@ -233,6 +264,8 @@ if ( "".equals(Args.filterName) ) {
   Console.err.println("Not filter name provided - exiting")
   System.exit(1)
 }
+
+if ( Args.delete_cache_file ) new File( getCacheFilePath(Args.filterName) ).delete()
 
 if ( Args.purgeIgnoreList ) {
   purgeIgnoreList(EXCLUDE_FILE)
@@ -259,10 +292,11 @@ val fw = loadAndPrintCacheFileIfExistsAndQuitOrCreateIt(Args.filterName, Args.de
 var nbIssuesIgnored = 0
 var nbIssuesRetrieved = 0
 val aphrodite = buildAphrodite()
-aphrodite.searchIssuesByFilter(new java.net.URL(loadFilterURl(Args.filterName))).foreach(bug => {
+aphrodite.searchIssuesByFilter(new
+  java.net.URL(loadFilterURl(Args.filterName))).sortBy( sortByField(_, Args.sortedBy)).foreach(bug => {
     nbIssuesRetrieved = nbIssuesRetrieved + 1
     if ( ! excludedIds.contains(bug.getURL.toString())) {
-      componentFilter(typeFilter(bug)) match {
+      componentFilter(assigneeFilter(typeFilter(bug))) match {
         case Some(bug) => {
           val line = formatEntry(bug)
           println(line)
