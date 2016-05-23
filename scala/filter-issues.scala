@@ -22,7 +22,8 @@ val filters = scala.collection.immutable.Map(
   ("MINE",    "https://bugzilla.redhat.com/buglist.cgi?cmdtype=dorem&remaction=run&sharer_id=374917&namedcmd=mine"),
   ("EAP7",    "https://issues.jboss.org/rest/api/latest/filter/12324632"),
   ("EAP7_UNASSIGNED", "https://issues.jboss.org/rest/api/latest/filter/12326223"),
-  ("EAP7_UNRESOLVED", "https://issues.jboss.org/rest/api/latest/filter/12326686")
+  ("EAP7_UNRESOLVED", "https://issues.jboss.org/rest/api/latest/filter/12326686"),
+  ("RPE_WIP",         "https://issues.jboss.org/rest/api/latest/filter/12327088")
 )
 
 val MAX_ISSUES_FETCHED = 1000
