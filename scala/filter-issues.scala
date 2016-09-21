@@ -38,14 +38,8 @@ val SET_USERNAME_LIST =
 
 object Args {
 
-  @Parameter(names = Array("-f", "--bz-filter-name"), description = "Filter name", required = false)
+  @Parameter(names = Array("-f", "--filter-name"), description = "Filter name", required = false)
   var filterName: String = ""
-
-  @Parameter(names = Array("-u", "--bz-username"), description = "Bugzilla Username", required = true)
-  var username: String = ""
-
-  @Parameter(names = Array("-p", "--bz-password"), description = "Bugzilla Password", required = true)
-  var password: String = ""
 
   @Parameter(names = Array("-c", "--clean-cache"), description = "Clean local cache file - forces lookup to remote server again.", required = false)
   var delete_cache_file: Boolean = false
@@ -171,12 +165,7 @@ def loadAndPrintCacheFileIfExistsAndQuitOrCreateIt(filterName: String, deleteCac
 def buildAphrodite() = {
 
   val filterUrl = loadFilterURl(Args.filterName)
-  val tracker = getServerUrl(filterUrl)
-  val trackerType = if ( tracker.contains("bugzilla") ) TrackerType.BUGZILLA else TrackerType.JIRA
-
-  val issueTrackerConfigs: List[IssueTrackerConfig] = new ArrayList[IssueTrackerConfig];
-  issueTrackerConfigs.add(new IssueTrackerConfig(tracker, Args.username, Args.password, trackerType, MAX_ISSUES_FETCHED))
-  Aphrodite.instance(AphroditeConfig.issueTrackersOnly(issueTrackerConfigs))
+  Aphrodite.instance()
 }
 
 def buildURLFromFileLine(x: String) = {

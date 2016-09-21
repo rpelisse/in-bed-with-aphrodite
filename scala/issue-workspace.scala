@@ -39,12 +39,6 @@ def saveOnFile(filename: String, content: String) = new java.io.PrintWriter(file
 
 object Args {
 
-  @Parameter(names = Array( "-u", "--username" ), description = "Bugzilla username", required = true)
-  var username = ""
-
-  @Parameter(names = Array( "-p", "--password" ), description = "BugZilla password", required = true)
-  var password = ""
-
   @Parameter(names = Array( "-d", "--issue-workdir" ), description = "root directory where to create the issue dir", required = true)
   var rootDir = ""
 
@@ -54,17 +48,9 @@ object Args {
 
 new JCommander(Args, args.toArray: _*)
 
-def getServerUrl(s: String) =  s.substring(0,s.indexOf('/', "https://".length) + 1)
+val issuePrefix = if ( Args.bugId.contains("bugzilla") ) "BZ" else ""
 
-val tracker = getServerUrl(Args.bugId)
-val trackerType = if ( tracker.contains("bugzilla") ) TrackerType.BUGZILLA else TrackerType.JIRA
-val issuePrefix = if ( trackerType.equals(TrackerType.BUGZILLA ) ) "BZ" else ""
-
-val issueTrackerConfigs: List[IssueTrackerConfig] = new ArrayList[IssueTrackerConfig];
-issueTrackerConfigs.add(new IssueTrackerConfig(tracker, Args.username, Args.password, trackerType , 1))
-
-val aphrodite = Aphrodite.instance(AphroditeConfig.issueTrackersOnly(issueTrackerConfigs))
-println("Aphrodite configured - retrieving data from server:" + tracker)
+val aphrodite = Aphrodite.instance()
 
 val issue = aphrodite.getIssue(new java.net.URL(Args.bugId))
 println("Retrieved Issue:" + issue.getSummary.get())

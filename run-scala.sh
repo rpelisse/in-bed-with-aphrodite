@@ -7,20 +7,13 @@ readonly JCOMMANDER=${JCOMMANDER:-"${HOME}/.m2/repository/com/beust/jcommander/$
 readonly APHRODITE_VERSION=${APHRODITE_VERSION:-'0.4.2-SNAPSHOT'}
 readonly APHRODITE=${APHRODITE:-"${HOME}/.m2/repository/org/jboss/set/aphrodite/${APHRODITE_VERSION}/aphrodite-${APHRODITE_VERSION}.jar"}
 
+readonly APHRODITE_CONFIG=$(pwd)/aphrodite-config.json
+
 readonly INTERACTIVE=${INTERACTIVE:-''}
-
-if [ -z "${TRACKER_USERNAME}" ]; then
-  echo "No 'username' for the tracker provided."
-  exit 1
-fi
-
-if [ -z "${TRACKER_PASSWORD}" ]; then
-  echo "No 'password' for the tracker provided."
-  exit 2
-fi
 
 readonly SCRIPT=${1}
 
 shift
 
-scala -classpath "${APHRODITE}:${JCOMMANDER}" "${SCRIPT}" -u "${TRACKER_USERNAME}" -p "${TRACKER_PASSWORD}" ${@}
+scala -Daphrodite.config=${APHRODITE_CONFIG}  -classpath "${APHRODITE}:${JCOMMANDER}" "${SCRIPT}" ${@}  2>&1 | \
+  sed -e '/INFOS:/d' -e  '/SLF4J:/d' -e '/logWarnMessage/d' -e '/svn repository/d' -e '/No repositories found which correspond to url:/d' -e '/org.jboss.set.aphrodite.Aphrodite init/d'
