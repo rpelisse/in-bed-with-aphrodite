@@ -23,7 +23,7 @@ val filters = scala.collection.immutable.Map(
   ("EAP7",    "https://issues.jboss.org/rest/api/latest/filter/12324632"),
   ("EAP7_UNASSIGNED", "https://issues.jboss.org/rest/api/latest/filter/12326223"),
   ("EAP7_UNRESOLVED", "https://issues.jboss.org/rest/api/latest/filter/12326686"),
-  ("RPE_WIP",         "https://issues.jboss.org/rest/api/latest/filter/12327088")
+  ("70z", "https://issues.jboss.org/rest/api/latest/filter/12328373")
 )
 
 val MAX_ISSUES_FETCHED = 1000
