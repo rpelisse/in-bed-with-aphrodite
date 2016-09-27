@@ -113,7 +113,7 @@ def endOfIdField(s: String): Int = {
 }
 
 def loadFilterURl(filterName: String):String = {
-  if ( filterName != null && ! "".equals(filterName) ) {
+  if ( filterName != null && ! "".equals(filterName) && filters.contains(filterName) ) {
     filters.get(filterName).get
   } else
     throw new IllegalArgumentException("Not such filters available:" + filterName)
