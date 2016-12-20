@@ -23,4 +23,20 @@ if [ ! -d "${WORKSPACES_ROOT}" ]; then
   exit 2
 fi
 
-${SCRIPT_HOME}/run-scala.sh ${SCRIPT_HOME}/scala/${SCRIPT_NAME} -i "${BUG_ID}" -d "${WORKSPACES_ROOT}"
+readonly SCRIPT_OUTPUT_LOGFILE=$(mktemp)
+${SCRIPT_HOME}/run-scala.sh ${SCRIPT_HOME}/scala/${SCRIPT_NAME} -i "${BUG_ID}" -d "${WORKSPACES_ROOT}" | tee "${SCRIPT_OUTPUT_LOGFILE}"
+
+which 'xclip' 2>&1 > /dev/null
+if [ ${?} -eq 0 ]; then
+   cat "${SCRIPT_OUTPUT_LOGFILE}" | grep -e 'Creating workdir'  | cut -d: -f2 | xclip
+   for status in "${PIPE_STATUS[@]}"
+   do
+        if [ ${status} -ne 0 ]; then
+          exit ${status}
+        fi
+   done
+   if [ ${?} -eq 0 ]; then
+     echo "Workdir full path has been added to clipboard"
+   fi
+fi
+rm -f "${SCRIPT_OUTPUT_LOGFILE}"
