@@ -17,14 +17,10 @@ import scala.collection.JavaConversions._
 
 // put your own filer here
 val filters = scala.collection.immutable.Map(
-  ("SET",     "https://bugzilla.redhat.com/buglist.cgi?cmdtype=dorem&remaction=run&sharer_id=374917&namedcmd=rpelisse-jboss-eap-6.4.z-superset-only-new"),
-  ("BACKLOG", "https://bugzilla.redhat.com/buglist.cgi?cmdtype=dorem&remaction=run&sharer_id=213224&namedcmd=Potential%20JBoss%20SET%20EAP%206%20issues"),
-  ("MINE",    "https://bugzilla.redhat.com/buglist.cgi?cmdtype=dorem&remaction=run&sharer_id=374917&namedcmd=mine"),
-  ("EAP7",    "https://issues.jboss.org/rest/api/latest/filter/12324632"),
-  ("EAP7_UNASSIGNED", "https://issues.jboss.org/rest/api/latest/filter/12326223"),
-  ("EAP7_UNRESOLVED", "https://issues.jboss.org/rest/api/latest/filter/12326686"),
-  ("70z", "https://issues.jboss.org/rest/api/latest/filter/12328373"),
-  ("710", "https://issues.jboss.org/rest/api/latest/filter/12328451")
+  ("70z",    "https://issues.jboss.org/rest/api/latest/filter/" + "12324632"),
+  ("710", "https://issues.jboss.org/rest/api/latest/filter/" + "12330472"),
+  ("ME", "https://issues.jboss.org/rest/api/latest/filter/" + "12327088"),
+  ("SET", "https://issues.jboss.org/rest/api/latest/filter/" + "12330394")
 )
 
 val MAX_ISSUES_FETCHED = 1000
