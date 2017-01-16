@@ -1,0 +1,10 @@
+{
+  "streams": [
+    {
+      "name": "wildfly",
+      "upstream": "null",
+      "codebases": [
+      ]
+    }
+  ]
+}
