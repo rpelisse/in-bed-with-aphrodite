@@ -52,6 +52,9 @@ object Args {
 
   @Parameter(names = Array("-s", "--sort-by"), description = "indicate which field should be ", required = false)
   var sortedBy : String = "c"
+
+  @Parameter(names = Array("-C", "--cursor"), description = "adds > to prefix the current 'cursor' issue", required = false)
+  var cursorIssueId = ""
 }
 
 def collectionToSet(ids: Collection[String]): Set[String] = {
@@ -104,9 +107,16 @@ def formatAcksMap(map: Map[Flag, FlagStatus]) = { for ( e <- map.entrySet)  yiel
 
 def formatAssigne(bug: Issue) =  "@" + (if ( bug.getAssignee.isPresent ) bug.getAssignee.get().getName().get() else "")
 
-def formatEntry(bug: Issue): String= bug.getURL + "\t" + bug.getComponents + " - " + bug.getType.toString +  "\t" + formatAssigne(bug) + "\t\t'" + bug.getSummary().get + "'"
+def formatEntry(bug: Issue): String= addCursorIfNeeded(bug) + "\t" + bug.getComponents + " - " + bug.getType.toString +  "\t" + formatAssigne(bug) + "\t" + formatAcks(bug.getStage.getStateMap) + "\t\t'" + bug.getSummary().get + "'"
 
 def mv(oldName: String, newName: String) =  Try(new File(oldName).renameTo(new File(newName))).getOrElse(false)
+
+def addCursorIfNeeded(bug: Issue) = {
+  if (! "".equals(Args.cursorIssueId) && bug.getURL.toString().contains(Args.cursorIssueId))
+    ">>>> " + bug.getURL
+  else
+    bug.getURL.toString
+}
 
 def endOfIdField(s: String): Int = {
   val end = s.indexOf('\t')
