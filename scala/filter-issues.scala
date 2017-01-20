@@ -96,6 +96,12 @@ def componentFilter(issueOrNot: Option[Issue]): Option[Issue] = {
   }
 }
 
+def formatStage(map: Map[Flag, FlagStatus]) = { "[" + map.toString + "]" }
+
+def formatAcks(map: Map[Flag, FlagStatus]) = { "[" + formatAcksMap(map).toString().dropRight(1).replace("Set","").replace("(","") + "]" }
+
+def formatAcksMap(map: Map[Flag, FlagStatus]) = { for ( e <- map.entrySet)  yield (e.getKey + ":" + e.getValue.getSymbol) }
+
 def formatAssigne(bug: Issue) =  "@" + (if ( bug.getAssignee.isPresent ) bug.getAssignee.get().getName().get() else "")
 
 def formatEntry(bug: Issue): String= bug.getURL + "\t" + bug.getComponents + " - " + bug.getType.toString +  "\t" + formatAssigne(bug) + "\t\t'" + bug.getSummary().get + "'"
