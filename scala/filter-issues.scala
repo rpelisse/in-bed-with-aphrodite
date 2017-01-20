@@ -245,7 +245,14 @@ def sortByField(issue: Issue, option: String) = {
   }
 }
 
-new JCommander(Args, args.toArray: _*)
+try {
+  new JCommander(Args, args.toArray: _*)
+} catch {
+  case invalidParameter: com.beust.jcommander.ParameterException => {
+    println("Invalid Parameter:" + invalidParameter.getMessage())
+    System.exit(1)
+  }
+}
 
 if ( "".equals(Args.filterName) ) {
   Console.err.println("Not filter name provided - exiting")
