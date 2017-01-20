@@ -124,11 +124,12 @@ def endOfIdField(s: String): Int = {
   return s.length
 }
 
-def loadFilterURl(filterName: String):String = {
+def loadFilterURL(filterName: String):String = {
   if ( filterName != null && ! "".equals(filterName) && filters.contains(filterName) ) {
-    filters.get(filterName).get
+    return filters.get(filterName).get
   } else
-    throw new IllegalArgumentException("Not such filters available:" + filterName)
+    displayErrorMssgAndExit("Not such filters available:" + filterName)
+    return ""
 }
 
 def loadBugsFromLocalCacheFile(filename: String) = {
@@ -177,7 +178,7 @@ def loadAndPrintCacheFileIfExistsAndQuitOrCreateIt(filterName: String, deleteCac
 
 def buildAphrodite() = {
 
-  val filterUrl = loadFilterURl(Args.filterName)
+  val filterUrl = loadFilterURL(Args.filterName)
   Aphrodite.instance()
 }
 
@@ -261,13 +262,25 @@ def sortByField(issue: Issue, option: String) = {
   }
 }
 
+def displayErrorMssgAndExit(mssg:String, exitCode:Int = 1) = {
+  println(mssg)
+  System.exit(exitCode)
+}
+
+def createUrl(url:String):java.net.URL = {
+  try {
+    new java.net.URL(url)
+  } catch {
+    case malformedUrl: java.net.MalformedURLException => displayErrorMssgAndExit("Malformed URL:" + url + "\n" + malformedUrl.getMessage,2)
+    return null
+  }
+}
+
 try {
   new JCommander(Args, args.toArray: _*)
 } catch {
-  case invalidParameter: com.beust.jcommander.ParameterException => {
-    println("Invalid Parameter:" + invalidParameter.getMessage())
-    System.exit(1)
-  }
+  case invalidParameter: com.beust.jcommander.ParameterException => displayErrorMssgAndExit("Invalid Parameter:" + invalidParameter.getMessage())
+  case illegalArgument: java.lang.IllegalArgumentException => displayErrorMssgAndExit("Illegal Argument:" + illegalArgument)
 }
 
 if ( "".equals(Args.filterName) ) {
@@ -302,8 +315,7 @@ val fw = loadAndPrintCacheFileIfExistsAndQuitOrCreateIt(Args.filterName, Args.de
 var nbIssuesIgnored = 0
 var nbIssuesRetrieved = 0
 val aphrodite = buildAphrodite()
-aphrodite.searchIssuesByFilter(new
-  java.net.URL(loadFilterURl(Args.filterName))).sortBy( sortByField(_, Args.sortedBy)).foreach(bug => {
+aphrodite.searchIssuesByFilter(createUrl((loadFilterURL(Args.filterName)))).sortBy( sortByField(_, Args.sortedBy)).foreach(bug => {
     nbIssuesRetrieved = nbIssuesRetrieved + 1
     if ( ! excludedIds.contains(bug.getURL.toString())) {
       componentFilter(assigneeFilter(typeFilter(bug))) match {
