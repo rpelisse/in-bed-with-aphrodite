@@ -33,7 +33,7 @@ val EXCLUDE_FILE = System.getProperty("user.home") + File.separator + ".exclude-
 val EXCLUDE_COMPONENTS = scala.collection.immutable.List( "RPMs", "Documentation - Translation", "Maven Repository", "distribution", "mod_cluster", "Apache Server (httpd) and Connectors")
 
 val SET_USERNAME_LIST =
-  scala.collection.immutable.List("soul2zimate","istudens","rpelisse","baranowb", "iweiss","thofman", "spyrkob", "dpospisil", "elguardian", "ron_sigal", "pgier" /* not SET, but PROD*/)
+  scala.collection.immutable.List("soul2zimate","istudens","rpelisse","baranowb", "iweiss","thofman", "spyrkob", "dpospisil", "elguardian", "ron_sigal", "fedor.gavrilov", "ppalaga", "pgier" /* not SET, but PROD*/)
 
 object Args {
 
