@@ -107,7 +107,7 @@ def formatAcks(map: Map[Flag, FlagStatus]) = { "[" + formatAcksMap(map).toString
 
 def formatAcksMap(map: Map[Flag, FlagStatus]) = { for ( e <- map.entrySet)  yield (e.getKey + ":" + e.getValue.getSymbol) }
 
-def formatAssigne(bug: Issue) =  "@" + (if ( bug.getAssignee.isPresent ) bug.getAssignee.get().getName().get() else "")
+def formatAssigne(bug: Issue) =  "@" + (if ( bug.getAssignee.isPresent ) bug.getAssignee.get().getName().get() else "no_one")
 
 def formatEntry(bug: Issue): String= addCursorIfNeeded(bug) + "\t" + bug.getComponents + " - " + bug.getType.toString +  "\t" + formatAssigne(bug) + "\t" + formatAcks(bug.getStage.getStateMap) + "\t\t'" + bug.getSummary().get + "'"
 
