@@ -57,6 +57,9 @@ object Args {
 
   @Parameter(names = Array("-C", "--cursor"), description = "adds > to prefix the current 'cursor' issue", required = false)
   var cursorIssueId = ""
+
+  @Parameter(names = Array("--jboss-set"), description = "Filters issue already assigned to SET Members" , required = false)
+  var noSetFiltering = false;
 }
 
 def collectionToSet(ids: Collection[String]): Set[String] = {
@@ -74,6 +77,7 @@ def typeFilter(issue: Issue): Option[Issue] = issue.getType() match {
 }
 
 def assigneeFilter(issueOrNot: Option[Issue]): Option[Issue] = {
+  if ( ! Args.noSetFiltering ) return issueOrNot
   issueOrNot match {
     case Some(issue) => {
       if ( issue.getAssignee.isPresent) {
