@@ -320,7 +320,7 @@ val aphrodite = buildAphrodite()
 aphrodite.searchIssuesByFilter(createUrl((loadFilterURL(Args.filterName)))).sortBy( sortByField(_, Args.sortedBy)).foreach(bug => {
     nbIssuesRetrieved = nbIssuesRetrieved + 1
     if ( ! excludedIds.contains(bug.getURL.toString())) {
-      componentFilter(assigneeFilter(typeFilter(bug))) match {
+      assigneeFilter(componentFilter( typeFilter(bug) ) ) match {
         case Some(bug) => {
           val line = formatEntry(bug)
           println(line)
