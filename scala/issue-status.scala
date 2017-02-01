@@ -32,6 +32,8 @@ def printEstimateIfAny (issue: Issue): String = {
     "N/A"
 }
 
+def onlyReleasesFrom(issue: Issue) = { for (release <- issue.getReleases()) yield(release.getVersion.get()) }
+
 val aphrodite = Aphrodite.instance()
 
 def getUrls(listAsString : java.util.List[String]) = {
@@ -45,5 +47,5 @@ def getUrls(listAsString : java.util.List[String]) = {
 val issues = aphrodite.getIssues( getUrls(Args.bugId) )
 import collection.JavaConverters._
 for ( issue <- issues.asScala )
-  println(issue.getURL() + "\t" + issue.getStatus + "\t[" + printEstimateIfAny(issue) + "]\t - " + issue.getSummary.get)
+  println(issue.getURL() + "\t" + issue.getStatus + "\t[" + printEstimateIfAny(issue) + "]\t " + onlyReleasesFrom(issue).mkString(",") + " - " + issue.getSummary.get)
 aphrodite.close()
