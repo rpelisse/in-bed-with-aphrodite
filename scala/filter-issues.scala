@@ -107,7 +107,7 @@ def componentFilter(issueOrNot: Option[Issue]): Option[Issue] = {
 
 def formatStage(map: Map[Flag, FlagStatus]) = { "[" + map.toString + "]" }
 
-def formatAcks(map: Map[Flag, FlagStatus]) = { "[" + formatAcksMap(map).toString().dropRight(1).replace("Set","").replace("(","") + "]" }
+def formatAcks(map: Map[Flag, FlagStatus]) = { "[" + formatAcksMap(map).toString().dropRight(1).replace("Set","").replace("(","").replaceAll(":","") + "]" }
 
 def formatAcksMap(map: Map[Flag, FlagStatus]) = { for ( e <- map.entrySet)  yield (e.getKey + ":" + e.getValue.getSymbol) }
 
