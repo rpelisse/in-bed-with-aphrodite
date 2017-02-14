@@ -320,6 +320,7 @@ val fw = loadAndPrintCacheFileIfExistsAndQuitOrCreateIt(Args.filterName, Args.de
 // FIXME: incrementing counter ? So un-scala-ee...
 var nbIssuesIgnored = 0
 var nbIssuesRetrieved = 0
+var nbIssueDiplayed = 0
 val aphrodite = buildAphrodite()
 aphrodite.searchIssuesByFilter(createUrl((loadFilterURL(Args.filterName)))).sortBy( sortByField(_, Args.sortedBy)).foreach(bug => {
     nbIssuesRetrieved = nbIssuesRetrieved + 1
@@ -329,6 +330,7 @@ aphrodite.searchIssuesByFilter(createUrl((loadFilterURL(Args.filterName)))).sort
           val line = formatEntry(bug)
           println(line)
           appendToFile(fw, line)
+          nbIssueDiplayed = nbIssueDiplayed + 1
         }
         case None => {}
       }
@@ -336,7 +338,7 @@ aphrodite.searchIssuesByFilter(createUrl((loadFilterURL(Args.filterName)))).sort
       nbIssuesIgnored = nbIssuesIgnored + 1
   }
 )
+println("Nb Issue:" + nbIssueDiplayed + " (Retrieved:" + nbIssuesRetrieved + " / Ignored: " + nbIssuesIgnored + ")" )
+
 fw.close()
 aphrodite.close()
-Console.err.println("Nb issues retrieved:" + nbIssuesRetrieved)
-Console.err.println("Nb issues ignored:" + nbIssuesIgnored)
