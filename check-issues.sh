@@ -5,7 +5,12 @@ readonly URL_PREFIX="https://issues.jboss.org/browse/"
 
 readonly OUTPUT=$(mktemp)
 
-echo "Outputfile is ${OUTPUT}"
+if [ ! -d "${SCRIPT_HOME}" ]; then
+  echo "Provided SCRIPT_HOME does not exist: ${SCRIPT_HOME}"
+  exit 1
+fi
+
+echo "Outputfile is ${OUTPUT}" 1>&2
 source jira-env.sh
 for issue in $(ls -1d ~/Repositories/redhat/issues/JBEAP-* )
 do
