@@ -26,17 +26,19 @@ fi
 readonly SCRIPT_OUTPUT_LOGFILE=$(mktemp)
 ${SCRIPT_HOME}/run-scala.sh ${SCRIPT_HOME}/scala/${SCRIPT_NAME} -i "${BUG_ID}" -d "${WORKSPACES_ROOT}" | tee "${SCRIPT_OUTPUT_LOGFILE}"
 
-which 'xclip' 2>&1 > /dev/null
+readonly CLIPBOARD_APP='parcellite'
+which "${CLIPBOARD_APP}" 2>&1 > /dev/null
 if [ ${?} -eq 0 ]; then
-   cat "${SCRIPT_OUTPUT_LOGFILE}" | grep -e 'Creating workdir'  | cut -d: -f2 | xclip
+   cat "${SCRIPT_OUTPUT_LOGFILE}" | grep -e 'Creating workdir'  | cut -d: -f2 | "${CLIPBOARD_APP}" > /dev/null
    for status in "${PIPE_STATUS[@]}"
    do
+        rm -f "${SCRIPT_OUTPUT_LOGFILE}"
         if [ ${status} -ne 0 ]; then
           exit ${status}
         fi
    done
+
    if [ ${?} -eq 0 ]; then
      echo "Workdir full path has been added to clipboard"
    fi
 fi
-rm -f "${SCRIPT_OUTPUT_LOGFILE}"
