@@ -14,12 +14,6 @@ import com.beust.jcommander.ParameterException
 
 object Args {
 
-    @Parameter(names = Array( "-u", "--username" ), description = "Bugzilla username", required = true)
-    var username = ""
-
-    @Parameter(names = Array( "-p", "--password" ), description = "BugZilla password", required = true)
-    var password = ""
-
     @Parameter(names = Array( "-i", "--bug-id" ), description = "bug id", required = true)
     var bugId = ""
 
@@ -71,9 +65,7 @@ def allStageToSet() = {
   stage
 }
 
-val issueTrackerConfigs: List[IssueTrackerConfig] = new ArrayList[IssueTrackerConfig];
-issueTrackerConfigs.add(new IssueTrackerConfig(tracker, Args.username, Args.password, trackerType, 1))
-val aphrodite = Aphrodite.instance(AphroditeConfig.issueTrackersOnly(issueTrackerConfigs))
+val aphrodite = Aphrodite.instance()
 println("Aphrodite configured - retrieving data from server:" + tracker)
 
 val issue = aphrodite.getIssue(new java.net.URL(Args.bugId))
