@@ -23,16 +23,13 @@ new JCommander(Args, args.toArray: _*)
 def printIssueIfDevAckMissing(issue: Issue) = println(formatIssue(issue))
 def formatIssue(issue: Issue) = issue.getTrackerId.get + " (" + aggregateAllThreeFlags(issue.getStage()) + "): " + issue.getSummary.get + "[" + issue.getType() + "]"
 def aggregateAllThreeFlags(stage: Stage):String = (for ( f <- stage.getStateMap.keySet() ) yield(f.toString + stage.getStatus(f).getSymbol + ",")).mkString.dropRight(1)
-def printEstimateIfAny (issue: Issue): String = {
-  if ( issue.getEstimation.isPresent ) {
-    val initial = issue.getEstimation.get().getInitialEstimate()
-    val worked = issue.getEstimation.get().getHoursWorked()
-    return initial + "," + worked
-  } else
-    "N/A"
-}
 
-def onlyReleasesFrom(issue: Issue) = { for (release <- issue.getReleases()) yield(release.getVersion.get()) }
+def onlyReleasesFrom(issue: Issue) = {
+  if ( issue.getReleases().isEmpty )
+    "No Target Release"
+  else
+    (for (release <- issue.getReleases()) yield(release.getVersion.get())).mkString(",")
+}
 
 val aphrodite = Aphrodite.instance()
 
@@ -44,8 +41,17 @@ def getUrls(listAsString : java.util.List[String]) = {
   coll
 }
 
+def printLine(issue: Issue) = {
+  val url = issue.getURL
+  val status = issue.getStatus
+  val releases = onlyReleasesFrom(issue)
+  val stream = issue.getStreamStatus.keySet.iterator.next
+  val summary = issue.getSummary.get
+
+  println(f"$url%-43s $status%-8s $stream - $summary%-20s")
+}
+
 val issues = aphrodite.getIssues( getUrls(Args.bugId) )
 import collection.JavaConverters._
-for ( issue <- issues.asScala )
-  println(issue.getURL() + "\t" + issue.getStatus + "\t[" + printEstimateIfAny(issue) + "]\t " + onlyReleasesFrom(issue).mkString(",") + " - " + issue.getSummary.get)
+for ( issue <- issues.asScala ) printLine(issue)
 aphrodite.close()
