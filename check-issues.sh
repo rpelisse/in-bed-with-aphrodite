@@ -11,7 +11,6 @@ if [ ! -d "${SCRIPT_HOME}" ]; then
 fi
 
 echo "Outputfile is ${OUTPUT}" 1>&2
-source jira-env.sh
 for issue in $(ls -1d ~/Repositories/redhat/issues/JBEAP-* )
 do
     ${SCRIPT_HOME}/issue-status.sh "${URL_PREFIX}$(basename ${issue})"
