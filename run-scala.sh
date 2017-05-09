@@ -7,7 +7,7 @@ readonly JCOMMANDER=${JCOMMANDER:-"${HOME}/.m2/repository/com/beust/jcommander/$
 readonly APHRODITE_VERSION=${APHRODITE_VERSION:-'0.4.2-SNAPSHOT'}
 readonly APHRODITE=${APHRODITE:-"${HOME}/.m2/repository/org/jboss/set/aphrodite/${APHRODITE_VERSION}/aphrodite-${APHRODITE_VERSION}.jar"}
 
-readonly APHRODITE_CONFIG=$(pwd)/aphrodite-config.json
+readonly APHRODITE_CONFIG=${APHRODITE_CONFIG:-"$(pwd)/aphrodite-config.json"}
 
 readonly INTERACTIVE=${INTERACTIVE:-''}
 
