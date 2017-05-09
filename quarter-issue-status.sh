@@ -22,6 +22,6 @@ echo "Burn Rate is : ${nbIssue}"
 if [ ! -z "${FILTER_RESOLVED_ISSUES}" ]; then
     cat "${output}" | sed -e '/POST/d' -e '/VERIFIED/d' -e '/CLOSED/d'  -e '/MODIFIED/d' | sort -k2
 else
-    cat "${output}" | sort -k2 | sed -e 's/MODIFIED/RESOLVED/'
+    cat "${output}" | sed -e 's/MODIFIED/RESOLVED/' -e 's/CLOSED/RESOLVED/' | sort -k2
 fi
 rm -f "${output}"
