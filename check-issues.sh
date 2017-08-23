@@ -14,7 +14,10 @@ if [ ! -d "${SCRIPT_HOME}" ]; then
 fi
 
 echo "Outputfile is ${OUTPUT}" 1>&2
+readonly RESULT_FILE=$(mktemp)
 for issue in $(ls -1d /home/rpelisse/Repositories/redhat/issues/JBEAP-* )
 do
-    ${SCRIPT_HOME}/issue-status.sh "${URL_PREFIX}$(basename ${issue})"
+    ${SCRIPT_HOME}/issue-status.sh "${URL_PREFIX}$(basename ${issue})" >> "${RESULT_FILE}"
 done
+cat "${RESULT_FILE}" | sort -k2
+rm -f "${RESULT_FILE}"
