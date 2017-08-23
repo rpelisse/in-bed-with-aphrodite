@@ -15,13 +15,29 @@ if [ -z "${URLS}" ]; then
   exit 2
 fi
 
-output=$(mktemp)
-$(pwd)/issue-status.sh ${URLS} 2> /dev/null > "${output}"
-nbIssue=$(wc -l "${output}")
-echo "Burn Rate is : ${nbIssue}"
-if [ ! -z "${FILTER_RESOLVED_ISSUES}" ]; then
-    cat "${output}" | sed -e '/POST/d' -e '/VERIFIED/d' -e '/CLOSED/d'  -e '/MODIFIED/d' | sort -k2
-else
+printIssuesLists() {
+  local output=${1}
+
+  if [ ! -z "${FILTER_RESOLVED_ISSUES}" ]; then
+    cat "${output}" | sed -e '/RESOLVED/d' -e '/POST/d' -e '/VERIFIED/d' -e '/CLOSED/d'  -e '/MODIFIED/d' -e '/ON_QA/d' | sort -k2
+  else
+    nbIssue=0
     cat "${output}" | sed -e 's/MODIFIED/RESOLVED/' -e 's/CLOSED/RESOLVED/' | sort -k2
-fi
+  fi
+}
+
+output=$(mktemp)
+echo -n 'Retrieving issues... '
+$(pwd)/issue-status.sh "${URLS}" >> "${output}"
+echo 'Done.'
+
+export nbIssue=0
+printIssuesLists "${output}" | sed -e 's/MODIFIED/RESOLVED/' -e 's/CLOSED/RESOLVED/' | sort -k2 | \
+while
+  read issue
+do
+  nbIssue=$(expr "${nbIssue}" + 1)
+  echo "${nbIssue}) ${issue}"
+done
+echo "Burn Rate is : $(wc -l "${output}" | sed -e 's/^\([0-9]*\) *.$/\1/')"
 rm -f "${output}"
