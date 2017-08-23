@@ -303,6 +303,7 @@ if ( Args.purgeIgnoreList ) {
 
 if ( ! Args.ignoreIds.isEmpty ) {
   Console.err.println("Adding " + Args.ignoreIds.size + " issues (if no duplicate entries) to the ignore list:")
+  if ( ! Args.ignoreIds.isEmpty ) Args.ignoreIds.foreach(println)
   if ( ! "".equals(Args.reason) )
     ignoreIssues(Args.ignoreIds, Args.reason)
   else
