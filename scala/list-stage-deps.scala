@@ -29,5 +29,8 @@ def aggregateAllThreeFlags(stage: Stage):String = (for ( f <- stage.getStateMap.
 val aphrodite = Aphrodite.instance()
 val issue = aphrodite.getIssue(new java.net.URL(Args.bugId))
 println("Retrieved Issue:" + issue.getSummary.get())
+println("Depends on:")
 aphrodite.getIssues(issue.getDependsOn.asInstanceOf[java.util.Collection[java.net.URL]]).foreach(printIssueIfDevAckMissing)
+println("Blocked by:")
+aphrodite.getIssues(issue.getBlocks.asInstanceOf[java.util.Collection[java.net.URL]]).foreach(printIssueIfDevAckMissing)
 aphrodite.close()
