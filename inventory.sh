@@ -5,7 +5,7 @@ readonly ISSUES_LIST_FILES=${ISSUES_LIST_FILES:-'/tmp/listofissues.txt'}
 readonly RESULT_FILE=${RESULT_FILE:-$(mktemp)}
 
 if [ ! -e "${ISSUES_LIST_FILES}" ]; then
-  grep -e 'JBEAP-' ${REPORT_FILE} | sed -e 's/^* //' | sed -e 's/\([0-9]\) .*$/\1/' -e 's/ -//g' | sort -u > "${ISSUES_LIST_FILES}"
+  grep -e 'JBEAP-' ${REPORT_FILE} | sed -e 's/^* //' | sed -e 's/\([0-9]\) .*$/\1/' -e 's/^- //g' | sort -u > "${ISSUES_LIST_FILES}"
   if [ ! -e "${ISSUES_LIST_FILES}" ]; then
     echo "Issues list file is missing: ${ISSUES_LIST_FILES}."
     exit 1
