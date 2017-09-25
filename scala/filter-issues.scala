@@ -20,6 +20,7 @@ val restURL = "https://issues.jboss.org/rest/api/latest/filter/"
 val filters = scala.collection.immutable.Map(
   ("70z", restURL + "12324632"),
   ("71x", restURL + "12330472"),
+  ("72x", restURL + "12332911"),
   ("ME",  restURL + "12327088"),
   ("SET", restURL + "12330394"),
   ("705",restURL + "12331010")
