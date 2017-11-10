@@ -18,4 +18,4 @@ if [ -z "${#}" ]; then
   exit 1
 fi
 
-${SCRIPT_HOME}/run-scala.sh ${SCRIPT_HOME}/scala/${SCRIPT_NAME} -i ${@}
+${SCRIPT_HOME}/run-scala.sh ${SCRIPT_HOME}/scala/${SCRIPT_NAME} -i "${@}"
