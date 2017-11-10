@@ -14,7 +14,7 @@ import com.beust.jcommander.ParameterException
 
 object Args {
 
-    @Parameter(names = Array( "-i", "--bug-id" ), variableArity = true, description = "bug id", required = true)
+    @Parameter(names = Array( "-i", "--bug-id" ), variableArity = false, description = "bug id", required = true)
     var bugId : List[String] = new java.util.ArrayList[String](0)
 }
 
