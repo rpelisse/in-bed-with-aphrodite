@@ -6,18 +6,26 @@ readonly APHRODITE_CONFIG=${APHRODITE_CONFIG:-"${SCRIPT_HOME}/aphrodite-config.j
 export APHRODITE_CONFIG
 readonly URL_PREFIX="https://issues.jboss.org/browse/"
 
-readonly OUTPUT=$(mktemp)
-
 if [ ! -d "${SCRIPT_HOME}" ]; then
   echo "Provided SCRIPT_HOME does not exist: ${SCRIPT_HOME}"
   exit 1
 fi
 
-echo "Outputfile is ${OUTPUT}" 1>&2
-readonly RESULT_FILE=$(mktemp)
+if [ -z ${DEBUG} ]; then
+  readonly RESULT_FILE=$(mktemp)
+fi
+
 for issue in $(ls -1d /home/rpelisse/Repositories/redhat/issues/JBEAP-* )
 do
-    ${SCRIPT_HOME}/issue-status.sh "${URL_PREFIX}$(basename ${issue})" >> "${RESULT_FILE}"
+  if [ ! -z "${DEBUG}" ]; then
+    echo "- ${URL_PREFIX}$(basename ${issue}):"
+    ${SCRIPT_HOME}/issue-status.sh "${URL_PREFIX}$(basename ${issue})" 2> /dev/null | tee -a "${RESULT_FILE}"
+  else
+    ${SCRIPT_HOME}/issue-status.sh "${URL_PREFIX}$(basename ${issue})" 2> /dev/null >> "${RESULT_FILE}"
+  fi
 done
-cat "${RESULT_FILE}" | sort -k2
-rm -f "${RESULT_FILE}"
+
+if [ -z ${DEBUG} ]; then
+  cat "${RESULT_FILE}" | sort -k2
+  rm -f "${RESULT_FILE}"
+fi
