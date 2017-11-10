@@ -23,6 +23,7 @@ val filters = scala.collection.immutable.Map(
   ("72x", restURL + "12332911"),
   ("ME",  restURL + "12327088"),
   ("SET", restURL + "12330394"),
+  ("Backlog", restURL + "12317605"),
   ("705",restURL + "12331010")
 )
 
