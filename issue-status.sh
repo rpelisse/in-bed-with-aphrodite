@@ -18,4 +18,13 @@ if [ -z "${#}" ]; then
   exit 1
 fi
 
-${SCRIPT_HOME}/run-scala.sh ${SCRIPT_HOME}/scala/${SCRIPT_NAME} -i "${@}"
+readonly SET_ISSUES_STATUS="${SCRIPT_HOME}/set-issues-status.csv"
+if [ -e "${SET_ISSUES_STATUS}" ]; then
+    set_status=$(grep -e "${@}" "${SET_ISSUES_STATUS}" | cut -d\   -f2 | sed -e 's/ //g' )
+fi
+
+if [ ! -z "${set_status}" ]; then
+  ${SCRIPT_HOME}/run-scala.sh ${SCRIPT_HOME}/scala/${SCRIPT_NAME} -i "${@}" | sed -e "s/ASSIGNED/${set_status}/" -e "s/NEW/${set_status}/" -e "s/POST/${set_status}/"
+else
+   ${SCRIPT_HOME}/run-scala.sh ${SCRIPT_HOME}/scala/${SCRIPT_NAME} -i "${@}"
+fi
