@@ -3,19 +3,31 @@
 import scala.collection.JavaConversions._
 import scala.collection.immutable.Map
 import java.util._
+import java.io.File
 
 import org.jboss.set.aphrodite.Aphrodite
 import org.jboss.set.aphrodite.config._
 import org.jboss.set.aphrodite.domain._
+import org.jboss.set.aphrodite.issue.trackers.jira._
 
 import com.beust.jcommander.JCommander
+import com.beust.jcommander.IVariableArity
 import com.beust.jcommander.Parameter
 import com.beust.jcommander.ParameterException
 
-object Args {
+val SET_CUSTOM_STATUS_FILENAME = System.getProperty("user.dir") + File.separator + "set-issues-status.csv"
 
-    @Parameter(names = Array( "-i", "--bug-id" ), variableArity = false, description = "bug id", required = true)
+val displayPr = false
+
+object Args extends IVariableArity {
+
+    @Parameter(names = Array( "-i", "--bug-id" ), variableArity = true, description = "bug id", required = false)
     var bugId : List[String] = new java.util.ArrayList[String](0)
+
+    def processVariableArity(optionName: String, options: Array[String]) = {
+      bugId = options.toSeq
+      bugId.length
+    }
 }
 
 new JCommander(Args, args.toArray: _*)
@@ -41,17 +53,50 @@ def getUrls(listAsString : java.util.List[String]) = {
   coll
 }
 
-def printLine(issue: Issue) = {
+def getAssigneeIfAny(issue: Issue) = { if ( issue.getAssignee() != null && issue.getAssignee.isPresent() && issue.getAssignee.get().getName().isPresent() ) issue.getAssignee.get().getName().get() else "" }
+
+def getPrIfAny(jiraIssue: JiraIssue) = if ( jiraIssue != null ) jiraIssue.getPullRequests().toString() else "";
+
+def printLine(issue: Issue, issueStateMap: Map[String,String]) = {
   val url = issue.getURL
-  val status = issue.getStatus
+  val status = issueStateMap.get(url.toString).getOrElse(issue.getStatus.toString)
   val releases = onlyReleasesFrom(issue)
   val stream = issue.getStreamStatus.keySet.iterator.next
   val summary = issue.getSummary.get
+  val assignee = getAssigneeIfAny(issue)
 
-  println(f"$url%-43s $status%-8s $stream - $summary%-20s")
+  if ( displayPr ) {
+    val pr = getPrIfAny(issue.asInstanceOf[JiraIssue])
+    println(f"$url%-43s $status%-8s $stream [@$assignee] - $summary%-20s - PR: $pr")
+  } else
+    println(f"$url%-43s $status%-8s $stream [@$assignee] - $summary%-20s")
 }
 
+def printRelease(issue:Issue) = {
+  if ( issue.getReleases().isEmpty )
+    "No Releases"
+  else
+    (for ( release <- issue.getReleases()) yield(formatReleaseInfo(release))).mkString(",")
+}
+
+def formatReleaseInfo(release:Release) = {
+  var res = ""
+  if ( release.getVersion().isPresent() ) res = release.getVersion().get() + " " else res = "<No Version>" + " "
+  if ( release.getMilestone().isPresent() ) res = res + release.getMilestone().get() else res = res + "<No Milestone>"
+  res
+}
+
+def loadCustomStatusMapIfExists(filename: String) = if ( new File(filename).exists ) loadCustomStatusMap(filename).toMap else Map[String,String]()
+
+def loadCustomStatusMap(filename: String) = {
+    for {
+      line <- io.Source.fromFile(filename).getLines()
+      values = line.split(";").map(_.trim)
+    } yield (values(0) -> values(1))
+}
+
+val issueStateMap = loadCustomStatusMapIfExists(SET_CUSTOM_STATUS_FILENAME)
 val issues = aphrodite.getIssues( getUrls(Args.bugId) )
 import collection.JavaConverters._
-for ( issue <- issues.asScala ) printLine(issue)
+for ( issue <- issues.asScala ) printLine(issue,issueStateMap)
 aphrodite.close()
