@@ -1,9 +1,25 @@
 #!/bin/bash
 
-readonly CLASSPATH=${CLASSPATH:-"${HOME}/.m2/repository/org/jboss/jbossset/bugclerk-dist/1.0.1.Final-SNAPSHOT/bugclerk-dist-1.0.1.Final-SNAPSHOT-shaded.jar"}
+readonly BUGCLERK_JAR=${BUGCLERK_JAR:-"${HOME}/.m2/repository/org/jboss/jbossset/bugclerk-dist/1.0.2/bugclerk-dist-1.0.2-shaded.jar"}
+readonly JSOUP_JAR=${JSOUP_JAR:-'/home/rpelisse/.m2/repository/org/jsoup/jsoup/1.8.3.redhat-2/jsoup-1.8.3.redhat-2.jar'}
+readonly CLASSPATH=${BUGCLERK_JAR}:${JSOUP_JAR}:${CLASSPATH}
+
 readonly APHRODITE_CONFIG=${APHRODITE_CONFIG:-"$(pwd)/aphrodite-config.json"}
 
 readonly SCRIPT=${1}
+
+checkIfFileExists() {
+  local file=${1}
+
+  if [ ! -e "${file}" ]; then
+    echo "No such file: ${file} - can't run scripts without it, aborting."
+    exit 1
+  fi
+}
+
+checkIfFileExists "${BUGCLERK_JAR}"
+checkIfFileExists "${JSOUP_JAR}"
+checkIfFileExists "${APHRODITE_CONFIG}"
 
 shift
 
