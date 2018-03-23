@@ -10,12 +10,14 @@ import org.jboss.set.aphrodite.config._
 import org.jboss.set.aphrodite.domain._
 
 import com.beust.jcommander.JCommander
+import com.beust.jcommander.IVariableArity
 import com.beust.jcommander.Parameter
 import com.beust.jcommander.ParameterException
 
 import scala.collection.JavaConversions._
 
 // put your own filer here
+val debug = false
 val restURL = "https://issues.jboss.org/rest/api/latest/filter/"
 val filters = scala.collection.immutable.Map(
   ("70z", restURL + "12324632"),
@@ -37,7 +39,7 @@ val EXCLUDE_COMPONENTS = scala.collection.immutable.List( "RPMs", "Documentation
 val SET_USERNAME_LIST =
   scala.collection.immutable.List("mstefank", "gaol", "soul2zimate","istudens","rpelisse","baranowb", "iweiss","thofman", "spyrkob", "dpospisil", "elguardian", "ron_sigal", "fedor.gavrilov", "ppalaga", "pgier" /* not SET, but PROD*/, "gbadner" /* not SET, but similar */)
 
-object Args {
+object Args extends IVariableArity {
 
   @Parameter(names = Array("-f", "--filter-name"), description = "Filter name", required = false)
   var filterName: String = ""
@@ -62,6 +64,11 @@ object Args {
 
   @Parameter(names = Array("--jboss-set"), description = "Filters issue already assigned to SET Members" , required = false)
   var noSetFiltering = false;
+
+  def processVariableArity(optionName: String, options: Array[String]) = {
+    ignoreIds = options.toSeq
+    ignoreIds.length
+  }
 }
 
 def collectionToSet(ids: Collection[String]): Set[String] = {
@@ -115,7 +122,7 @@ def formatAcksMap(map: Map[Flag, FlagStatus]) = { for ( e <- map.entrySet)  yiel
 
 def formatAssigne(bug: Issue) =  "@" + (if ( bug.getAssignee.isPresent ) bug.getAssignee.get().getName().get() else "no_one")
 
-def formatEntry(bug: Issue): String= addCursorIfNeeded(bug) + "\t" + bug.getStatus + "\t" + bug.getComponents + " - " + bug.getType.toString +  "\t" + formatAssigne(bug) + "\t" + formatAcks(bug.getStage.getStateMap) + "\t'" + bug.getSummary().get + "'"
+def formatEntry(bug: Issue): String= addCursorIfNeeded(bug) + " \t" + bug.getStatus + "\t" + bug.getComponents + " - " + bug.getType.toString +  "\t" + formatAssigne(bug) + "\t" + formatAcks(bug.getStage.getStateMap) + "\t'" + bug.getSummary().get + "'"
 
 def mv(oldName: String, newName: String) =  Try(new File(oldName).renameTo(new File(newName))).getOrElse(false)
 
@@ -127,7 +134,7 @@ def addCursorIfNeeded(bug: Issue) = {
 }
 
 def endOfIdField(s: String): Int = {
-  val end = s.indexOf('\t')
+  val end = s.indexOf(' ')
   if ( end > 0 ) return end
   return s.length
 }
@@ -136,8 +143,8 @@ def loadFilterURL(filterName: String):String = {
   if ( filterName != null && ! "".equals(filterName) && filters.contains(filterName) ) {
     return filters.get(filterName).get
   } else
-    displayErrorMssgAndExit("Not such filters available:" + filterName)
-    return ""
+    displayErrorMssgAndExit("No such filters available:" + filterName)
+  return ""
 }
 
 def loadBugsFromLocalCacheFile(filename: String) = {
@@ -235,9 +242,9 @@ def buildURLListFrom(issues: List[String]) = {
      ignoreUrls = ignoreUrls.:+(new java.net.URL(issue))
     } catch {
       case malformedUrl: java.net.MalformedURLException =>
-        Console.err.println("Not a valid URL:" + issue + " - aborting, no change to the ignore list was made.")
+        if ( debug ) Console.err.println("Not a valid URL:" + issue + " - aborting, no change to the ignore list was made.")
       case unexceptedException: Throwable =>
-        Console.err.println("Exception raised while processing issues list:" + unexceptedException)
+        if ( debug ) Console.err.println("Exception raised while processing issues list:" + unexceptedException)
     }
   }
   ignoreUrls.distinct // removes duplicates URL
@@ -292,7 +299,7 @@ try {
 }
 
 if ( "".equals(Args.filterName) ) {
-  Console.err.println("Not filter name provided - exiting")
+  Console.err.println("No filter name provided - exiting")
   System.exit(1)
 }
 
@@ -304,8 +311,6 @@ if ( Args.purgeIgnoreList ) {
 }
 
 if ( ! Args.ignoreIds.isEmpty ) {
-  Console.err.println("Adding " + Args.ignoreIds.size + " issues (if no duplicate entries) to the ignore list:")
-  if ( ! Args.ignoreIds.isEmpty ) Args.ignoreIds.foreach(println)
   if ( ! "".equals(Args.reason) )
     ignoreIssues(Args.ignoreIds, Args.reason)
   else
@@ -313,11 +318,11 @@ if ( ! Args.ignoreIds.isEmpty ) {
   System.exit(0)
 }
 
+val fw = loadAndPrintCacheFileIfExistsAndQuitOrCreateIt(Args.filterName, Args.delete_cache_file)
+
 Console.err.println("Loading local exclusion list " + EXCLUDE_FILE)
 val excludedIds = excludeList(EXCLUDE_FILE)
 Console.err.println(excludedIds.size + " issues to ignore.")
-
-val fw = loadAndPrintCacheFileIfExistsAndQuitOrCreateIt(Args.filterName, Args.delete_cache_file)
 
 // If we reach this, we need to load data from Tracker...
 // FIXME: incrementing counter ? So un-scala-ee...
