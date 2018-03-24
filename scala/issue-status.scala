@@ -1,6 +1,7 @@
 //$ scala -classpath ~/.m2/repository/org/jboss/jbossset/bugclerk/0.5.2.Final/bugclerk-0.5.2.Final.jar
 
 import scala.collection.JavaConversions._
+import collection.JavaConverters._
 import scala.collection.immutable.Map
 import java.util._
 import java.io.File
@@ -97,6 +98,8 @@ def loadCustomStatusMap(filename: String) = {
 
 val issueStateMap = loadCustomStatusMapIfExists(SET_CUSTOM_STATUS_FILENAME)
 val issues = aphrodite.getIssues( getUrls(Args.bugId) )
-import collection.JavaConverters._
-for ( issue <- issues.asScala ) printLine(issue,issueStateMap)
+if ( issues.isEmpty() )
+  println("No issue found for " + Args.bugId)
+else
+  for ( issue <- issues.asScala ) printLine(issue,issueStateMap)
 aphrodite.close()
