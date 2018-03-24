@@ -10,7 +10,6 @@ import org.jboss.set.aphrodite.config._
 import org.jboss.set.aphrodite.domain._
 
 import com.beust.jcommander.JCommander
-import com.beust.jcommander.IVariableArity
 import com.beust.jcommander.Parameter
 import com.beust.jcommander.ParameterException
 
@@ -37,7 +36,7 @@ val EXCLUDE_COMPONENTS = scala.collection.immutable.List( "RPMs", "Documentation
 val SET_USERNAME_LIST =
   scala.collection.immutable.List("mstefank", "gaol", "soul2zimate","istudens","rpelisse","baranowb", "iweiss","thofman", "spyrkob", "dpospisil", "elguardian", "ron_sigal", "fedor.gavrilov", "ppalaga", "pgier" /* not SET, but PROD*/, "gbadner" /* not SET, but similar */)
 
-object Args extends IVariableArity {
+object Args {
 
   @Parameter(names = Array("-f", "--filter-name"), description = "Filter name", required = false)
   var filterName: String = ""
@@ -48,8 +47,8 @@ object Args extends IVariableArity {
   @Parameter(names = Array("-P", "--purge-ignore-list"), description = "Clean local ignore list file", required = false)
   var purgeIgnoreList: Boolean = false
 
-  @Parameter(names = Array("-i", "--add-issues-to-ignore-list") , variableArity = true, required = false)
-  var ignoreIds: java.util.List[String] = new java.util.ArrayList[String]()
+  @Parameter(names = Array("-i", "--add-issue-to-ignore-list"), required = false)
+  var ignoreId: String = ""
 
   @Parameter(names = Array("-r", "--reason-to-ignore"), description = "Use with -i and gives extra information on why the issue has been added to the ignore list", required = false)
   var reason: String = ""
@@ -62,11 +61,6 @@ object Args extends IVariableArity {
 
   @Parameter(names = Array("--jboss-set"), description = "Filters issue already assigned to SET Members" , required = false)
   var noSetFiltering = false;
-
-  def processVariableArity(optionName: String, options: Array[String]) = {
-    ignoreIds = options.toSeq
-    ignoreIds.length
-  }
 }
 
 def collectionToSet(ids: Collection[String]): Set[String] = {
@@ -220,24 +214,7 @@ def purgeIgnoreList(excludeFilename: String): Unit = {
   Console.err.println("Purging done, " + EXCLUDE_FILE + " has been updated.")
 }
 
-def buildURLListFrom(issues: List[String]) = {
-  var ignoreUrls: Seq[java.net.URL] = Seq[java.net.URL]()
-  for ( issue <- issues) {
-    try {
-     ignoreUrls = ignoreUrls.:+(new java.net.URL(issue))
-    } catch {
-      case malformedUrl: java.net.MalformedURLException =>
-        if ( debug ) Console.err.println("Not a valid URL:" + issue + " - aborting, no change to the ignore list was made.")
-      case unexceptedException: Throwable =>
-        if ( debug ) Console.err.println("Exception raised while processing issues list:" + unexceptedException)
-    }
-  }
-  ignoreUrls.distinct // removes duplicates URL
-}
-
-def ignoreIssues(issues: List[String], reason: String = "No reason provided") =
-  for ( issue <- buildAphrodite().getIssues( ((for ( url <- buildURLListFrom(issues) ) yield(url)).asJava) ) )
-    yield(addBugToExcludeList(issue, reason))
+def ignoreIssues(issue: String, reason: String = "No reason provided") = addBugToExcludeList(buildAphrodite().getIssue( new java.net.URL(issue)),reason)
 
 def addBugToExcludeList(bug: Issue, reason: String) = scala.tools.nsc.io.File(EXCLUDE_FILE).appendAll(formatEntry(bug)  + ", state: " + bug.getStatus.toString + ", " + reason + "\n")
 
@@ -284,11 +261,11 @@ if ( Args.purgeIgnoreList ) {
   System.exit(0)
 }
 
-if ( ! Args.ignoreIds.isEmpty ) {
+if ( ! "".equals(Args.ignoreId) ) {
   if ( ! "".equals(Args.reason) )
-    ignoreIssues(Args.ignoreIds, Args.reason)
+    ignoreIssues(Args.ignoreId, Args.reason)
   else
-    ignoreIssues(Args.ignoreIds)
+    ignoreIssues(Args.ignoreId)
   System.exit(0)
 }
 
