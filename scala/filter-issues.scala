@@ -15,8 +15,8 @@ import com.beust.jcommander.Parameter
 import com.beust.jcommander.ParameterException
 
 import scala.collection.JavaConversions._
+import collection.JavaConverters._
 
-// put your own filer here
 val debug = false
 val restURL = "https://issues.jboss.org/rest/api/latest/filter/"
 val filters = scala.collection.immutable.Map(
@@ -25,13 +25,11 @@ val filters = scala.collection.immutable.Map(
   ("72x", restURL + "12332911"),
   ("ME",  restURL + "12327088"),
   ("SET", restURL + "12330394"),
-  ("Backlog", restURL + "12317605"),
-  ("705",restURL + "12331010")
+  ("Backlog", restURL + "12317605")
 )
 
 val MAX_ISSUES_FETCHED = 1000
 
-// change if you will
 val EXCLUDE_FILE = System.getProperty("user.home") + File.separator + ".exclude-list.csv"
 
 val EXCLUDE_COMPONENTS = scala.collection.immutable.List( "RPMs", "Documentation - Translation", "Maven Repository", "distribution", "mod_cluster", "Apache Server (httpd) and Connectors")
@@ -169,12 +167,9 @@ def loadAndPrintCacheFileThenExit(cacheFile: File) = {
   System.exit(0)
 }
 
-def getServerUrl(s: String) = {
-  s.substring(0,s.indexOf('/', "https://".length) + 1)
-}
+def getServerUrl(s: String) = s.substring(0,s.indexOf('/', "https://".length) + 1)
 
 def excludeList(filename: String): List[String] = {
-
   if ( Files.exists(Paths.get(filename) ) )
     scala.io.Source.fromFile(filename).getLines().toList.collect { case s: String => s.substring(0, endOfIdField(s)) }
   else
@@ -183,50 +178,40 @@ def excludeList(filename: String): List[String] = {
 
 def loadAndPrintCacheFileIfExistsAndQuitOrCreateIt(filterName: String, deleteCacheFile: Boolean) = {
   val cacheFile = new File(getCacheFilePath(filterName))
-  if ( cacheFile.exists() && ! deleteCacheFile ) {
-    loadAndPrintCacheFileThenExit(cacheFile)
-  }
+  if ( cacheFile.exists() && ! deleteCacheFile ) loadAndPrintCacheFileThenExit(cacheFile)
   cacheFile.createNewFile()
-
   new FileWriter(cacheFile.getAbsolutePath(), true)
 }
 
 def buildAphrodite() = {
-
   val filterUrl = loadFilterURL(Args.filterName)
   Aphrodite.instance()
 }
 
-def buildURLFromFileLine(x: String) = {
-  new java.net.URL(x.substring(0,endOfURL(x)))
-}
+def buildURLFromFileLine(x: String) = new java.net.URL(x.substring(0,endOfURL(x)))
 
 def endOfURL(s: String, sep: String = "\t"): Int = { if ( s.indexOf(sep) == -1 ) s.length else s.indexOf(sep) }
 
 def loadFile(pathToFile:String) = { scala.io.Source.fromFile(pathToFile).getLines() }
 
-// FIXME: there is for sure a better Scala way to do this !!!
-def loadExcludedIssues() = {
-  var coll: java.util.Collection[java.net.URL] = new java.util.ArrayList[java.net.URL]()
-  val list = for ( line <- loadFile(EXCLUDE_FILE)) yield(buildURLFromFileLine(line))
-  list.foreach { coll.add }
-  coll
-}
+def loadExcludedIssues(): List[java.net.URL] = (for ( line <- loadFile(EXCLUDE_FILE)) yield(buildURLFromFileLine(line))).toList
 
 def backupAndUpdateFile(it: scala.collection.GenTraversableOnce[String]) = {
   val tmpFile = EXCLUDE_FILE + ".tmp"
   new java.io.PrintWriter(tmpFile) { write(it.mkString("\n")); close }
-  //FIXME add checksum before mv to avoid replace .bck if content is the same
-  mv(EXCLUDE_FILE, EXCLUDE_FILE + ".bck")
-  mv(tmpFile, EXCLUDE_FILE)
+  if ( ! (loadFile(tmpFile).toList.diff(loadFile(EXCLUDE_FILE).toList)).isEmpty ) {
+    mv(EXCLUDE_FILE, EXCLUDE_FILE + ".bck")
+    mv(tmpFile, EXCLUDE_FILE)
+  }
 }
 
-def purgeIgnoreList(excludeFilename: String): Unit = {
-  Console.err.println("Purging excluded issues file from issue no longer in a NEW state.")
+val statusNotTakenCareOf = scala.collection.immutable.List(IssueStatus.NEW, IssueStatus.CREATED, IssueStatus.UNDEFINED, IssueStatus.ASSIGNED)
 
-  var coll = loadExcludedIssues
-  Console.err.println("Issues loaded:" + coll.size)
-  val issuesToKeep = buildAphrodite().getIssues(coll).collect { case issue:Issue if issue.getStatus.equals(org.jboss.set.aphrodite.domain.IssueStatus.NEW) => issue }
+def purgeIgnoreList(excludeFilename: String): Unit = {
+  Console.err.println("Purging excluded issues file from issue no longer in a the following states:" + statusNotTakenCareOf.mkString(" "))
+  val issuesToKeep = ( for ( url <- loadExcludedIssues ) yield(buildAphrodite().getIssue(url))).collect {
+    case issue:Issue if statusNotTakenCareOf.contains(issue.getStatus) => issue
+  }
   val issuesIndexedByURL = issuesToKeep.map(issue => issue.getURL -> issue).toMap
   Console.err.println("Issues to keep:" + issuesToKeep.size)
   backupAndUpdateFile(loadFile(EXCLUDE_FILE).collect {
@@ -250,20 +235,9 @@ def buildURLListFrom(issues: List[String]) = {
   ignoreUrls.distinct // removes duplicates URL
 }
 
-// FIXME: there is for sure a better Scala way to do this !!!
-// FIXME/ no reason for Seq, switch to List
-def turnIntoURLsCollection(urls: Seq[java.net.URL]) = {
-  var coll: java.util.Collection[java.net.URL] = new java.util.ArrayList[java.net.URL]()
-  val list = for ( url <- urls ) yield(url)
-  list.foreach {coll.add}
-  coll
-}
-
-def ignoreIssues(issues: List[String], reason: String = "No reason provided") = {
-  val coll = turnIntoURLsCollection(buildURLListFrom(issues))
-  val ignoredIssues = buildAphrodite().getIssues(coll)
-  for ( issue <- ignoredIssues) yield(addBugToExcludeList(issue, reason))
-}
+def ignoreIssues(issues: List[String], reason: String = "No reason provided") =
+  for ( issue <- buildAphrodite().getIssues( ((for ( url <- buildURLListFrom(issues) ) yield(url)).asJava) ) )
+    yield(addBugToExcludeList(issue, reason))
 
 def addBugToExcludeList(bug: Issue, reason: String) = scala.tools.nsc.io.File(EXCLUDE_FILE).appendAll(formatEntry(bug)  + ", state: " + bug.getStatus.toString + ", " + reason + "\n")
 
