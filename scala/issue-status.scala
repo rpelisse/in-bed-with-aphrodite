@@ -58,19 +58,21 @@ def getAssigneeIfAny(issue: Issue) = { if ( issue.getAssignee() != null && issue
 
 def getPrIfAny(jiraIssue: JiraIssue) = if ( jiraIssue != null ) jiraIssue.getPullRequests().toString() else "";
 
+def getStreamFrom(issue:Issue) = if ( issue.getStreamStatus() != null && ! issue.getStreamStatus().isEmpty() ) issue.getStreamStatus().keySet().iterator().next().toString() else ""
+
 def printLine(issue: Issue, issueStateMap: Map[String,String]) = {
   val url = issue.getURL
   val status = issueStateMap.get(url.toString).getOrElse(issue.getStatus.toString)
   val releases = onlyReleasesFrom(issue)
-  val stream = issue.getStreamStatus.keySet.iterator.next
+  val stream = getStreamFrom(issue)
   val summary = issue.getSummary.get
-  val assignee = getAssigneeIfAny(issue)
+  val acks = formatAcks(issue.getStage.getStateMap)
 
   if ( displayPr ) {
     val pr = getPrIfAny(issue.asInstanceOf[JiraIssue])
-    println(f"$url%-43s $status%-8s $stream [@$assignee] - $summary%-20s - PR: $pr")
+    println(f"$url%-43s $status%-8s $stream $acks - $summary%-20s - PR: $pr")
   } else
-    println(f"$url%-43s $status%-8s $stream [@$assignee] - $summary%-20s")
+    println(f"$url%-43s $status%-8s $stream $acks - $summary%-20s")
 }
 
 def printRelease(issue:Issue) = {
@@ -96,8 +98,20 @@ def loadCustomStatusMap(filename: String) = {
     } yield (values(0) -> values(1))
 }
 
+def loadIssues(issues:List[String]):java.util.List[Issue] = {
+  try {
+    aphrodite.getIssues( getUrls(issues) )
+  } catch {
+    case e: Throwable => throw e
+  }
+}
+
+def formatAcks(map: java.util.Map[Flag, FlagStatus]) = { "[" + formatAcksMap(map).toString().dropRight(1).replace("Set","").replace("(","").replaceAll(":","") + "]" }
+
+def formatAcksMap(map: java.util.Map[Flag, FlagStatus]) = { for ( e <- map.entrySet)  yield (e.getKey + ":" + e.getValue.getSymbol) }
+
 val issueStateMap = loadCustomStatusMapIfExists(SET_CUSTOM_STATUS_FILENAME)
-val issues = aphrodite.getIssues( getUrls(Args.bugId) )
+val issues = loadIssues(Args.bugId)
 if ( issues.isEmpty() )
   println("No issue found for " + Args.bugId)
 else
