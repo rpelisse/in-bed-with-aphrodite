@@ -28,7 +28,7 @@ printIssuesLists() {
 
 output=$(mktemp)
 echo -n 'Retrieving issues... '
-$(pwd)/issue-status.sh "${URLS}" >> "${output}"
+$(pwd)/issue-status.sh ${URLS} >> "${output}"
 echo 'Done.'
 
 export nbIssue=0
