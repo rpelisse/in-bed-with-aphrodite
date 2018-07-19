@@ -11,11 +11,9 @@ if [ ! -d "${SCRIPT_HOME}" ]; then
   exit 1
 fi
 
-if [ -z ${DEBUG} ]; then
-  readonly RESULT_FILE=$(mktemp)
-fi
+readonly RESULT_FILE=$(mktemp)
 
-for issue in $(ls -1d /home/rpelisse/Repositories/redhat/issues/JBEAP-* )
+for issue in $(ls -1d /home/rpelisse/Repositories/redhat/issues/* )
 do
   if [ ! -z "${DEBUG}" ]; then
     echo "- ${URL_PREFIX}$(basename ${issue}):"
