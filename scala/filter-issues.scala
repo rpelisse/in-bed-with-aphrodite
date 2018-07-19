@@ -115,7 +115,8 @@ def formatAcksMap(map: Map[Flag, FlagStatus]) = { for ( e <- map.entrySet)  yiel
 
 def formatAssigne(bug: Issue) =  "@" + (if ( bug.getAssignee.isPresent ) bug.getAssignee.get().getName().get() else "no_one")
 
-def formatEntry(bug: Issue): String= addCursorIfNeeded(bug) + " \t" + bug.getStatus + "\t" + bug.getComponents + " - " + bug.getType.toString +  "\t" + formatAssigne(bug) + "\t" + formatAcks(bug.getStage.getStateMap) + "\t'" + bug.getSummary().get + "'"
+def formatEntry(bug: Issue): String= addCursorIfNeeded(bug) + " \t" + bug.getStatus + "\t" + bug.getComponents + " - " + bug.getType.toString +  "\t" + formatAssigne(bug) + "\t" +
+        formatAcks(bug.getStage.getStateMap) + "\t'" + bug.getSummary().get + "'"
 
 def mv(oldName: String, newName: String) =  Try(new File(oldName).renameTo(new File(newName))).getOrElse(false)
 
