@@ -23,8 +23,9 @@ val filters = scala.collection.immutable.Map(
   ("71x", restURL + "12330472"),
   ("72x", restURL + "12332911"),
   ("ME",  restURL + "12327088"),
-  ("SET", restURL + "12330394"),
-  ("Backlog", restURL + "12317605")
+  ("SET_NOT_DONE", restURL + "12330394"),
+  ("SET", restURL + "12317605"),
+  ("JDG", restURL + "12335193")
 )
 
 val MAX_ISSUES_FETCHED = 1000
