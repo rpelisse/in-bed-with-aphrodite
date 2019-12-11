@@ -19,13 +19,13 @@ import collection.JavaConverters._
 val debug = false
 val restURL = "https://issues.redhat.com/rest/api/latest/filter/"
 val filters = scala.collection.immutable.Map(
-  ("70z", restURL + "12324632"),
-  ("71x", restURL + "12330472"),
   ("72x", restURL + "12332911"),
-  ("ME",  restURL + "12327088"),
+  ("73x", restURL + "12341905"),
+  ("ME",  restURL + "12338392"),
   ("SET_NOT_DONE", restURL + "12330394"),
   ("SET", restURL + "12317605"),
-  ("JDG", restURL + "12335193")
+  ("JDG", restURL + "12335193"),
+  ("BACKLOG", restURL + "12332905")
 )
 
 val MAX_ISSUES_FETCHED = 1000
