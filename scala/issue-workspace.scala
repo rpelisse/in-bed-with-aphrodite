@@ -22,7 +22,6 @@ val EOL = "\n"
 def formatIssue(issue: Issue) = {
   issue.getTrackerId.get + EOL +
   issue.getSummary.get + " (" + aggregateAllThreeFlags(issue.getStage()) + ")" + EOL
-  issue.getReleases().toString + EOL
   issue.getDescription.get + EOL + aggregateComments(issue)
 }
 
