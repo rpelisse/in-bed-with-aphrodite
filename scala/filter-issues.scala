@@ -28,14 +28,10 @@ val filters = scala.collection.immutable.Map(
   ("BACKLOG", restURL + "12332905")
 )
 
-val MAX_ISSUES_FETCHED = 1000
-
 val EXCLUDE_FILE = System.getProperty("user.home") + File.separator + ".exclude-list.csv"
-
 val EXCLUDE_COMPONENTS = scala.collection.immutable.List( "RPMs", "Documentation - Translation", "Maven Repository", "distribution", "mod_cluster", "Apache Server (httpd) and Connectors")
-
 val SET_USERNAME_LIST =
-  scala.collection.immutable.List("mstefank", "gaol", "soul2zimate","istudens","rpelisse","baranowb", "iweiss","thofman", "spyrkob", "dpospisil", "elguardian", "ron_sigal", "fedor.gavrilov", "ppalaga", "pgier" /* not SET, but PROD*/, "gbadner" /* not SET, but similar */)
+  scala.collection.immutable.List("mstefank", "gaol", "soul2zimate","istudens","rpelisse","baranowb", "iweiss","thofman", "spyrkob", "elguardian", "ron_sigal", "fedor.gavrilov", "ppalaga", "pgier" /* not SET, but PROD*/, "gbadner" /* not SET, but similar */)
 
 object Args {
 
