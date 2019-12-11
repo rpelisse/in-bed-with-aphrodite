@@ -17,7 +17,7 @@ import scala.collection.JavaConversions._
 import collection.JavaConverters._
 
 val debug = false
-val restURL = "https://issues.jboss.org/rest/api/latest/filter/"
+val restURL = "https://issues.redhat.com/rest/api/latest/filter/"
 val filters = scala.collection.immutable.Map(
   ("70z", restURL + "12324632"),
   ("71x", restURL + "12330472"),
