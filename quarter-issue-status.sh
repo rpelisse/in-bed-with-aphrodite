@@ -8,7 +8,7 @@ if [ ! -e "${BURN_RATE_FILE}" ]; then
   exit 1
 fi
 
-readonly URLS=$(grep -e '^- ' "${BURN_RATE_FILE}"  | sed -e 's/^- //' -e '/bugzilla./d' )
+readonly URLS=$(grep -e '^- ' "${BURN_RATE_FILE}" | sed -e 's/^- //' -e '/bugzilla./d' -e 's/\( -.*\)$//')
 
 if [ -z "${URLS}" ]; then
   echo "No URLs in ${BURN_RATE_FILE}."
